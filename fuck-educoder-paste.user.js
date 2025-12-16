@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ✨2026最新可用 - 完美解决【头歌平台】禁复制/粘贴问题
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/ystemsrx/fuck-educoder-paste
 // @version      2.0.1
 // @description  1）阻止网页脚本拦截复制/粘贴/全选等快捷键；2）禁止网页往剪贴板写入“全空白”内容；3）在代码编辑器中粘贴前，如果光标前一段是纯空格/Tab，则先清掉这些缩进，再原样粘贴内容。
 // @author       ystemsrx
@@ -8,6 +8,7 @@
 // @match        https://educoder.net/*
 // @match        https://*.educoder.net/*
 // @run-at       document-start
+// @license      MIT
 // @grant        none
 // ==/UserScript==
 
