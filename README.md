@@ -1,6 +1,6 @@
-# ✨最新可用 - 完美解决【头歌平台】禁复制/粘贴问题
+# ✨最新可用 - 完美解决【头歌 / 学习通】禁复制/粘贴问题
 
-一个强大的油猴脚本,用于解决头歌(Educoder)平台的复制粘贴限制问题。
+一个强大的油猴脚本,用于解决头歌和超星学习通的复制粘贴限制问题。
 
 ## 📋 功能特性
 
@@ -66,6 +66,15 @@
 - `https://www.educoder.net/*`
 - `https://educoder.net/*`
 - `https://*.educoder.net/*`
+- `https://www.educoder.net/*`
+- `https://educoder.net/*`
+- `https://*.educoder.net/*`
+- `*://*.chaoxing.com/*`
+- `*://chaoxing.com/*`
+- `*://*.xueyinonline.com/*`
+- `*://xueyinonline.com/*`
+- `*://*.chaoxingerya.com/*`
+- `*://chaoxingerya.com/*`
 
 ### 支持的编辑器
 
