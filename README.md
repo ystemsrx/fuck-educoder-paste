@@ -95,6 +95,17 @@
 
 欢迎提交 Issue 和 Pull Request!
 
+### 开发验证
+
+使用 Node.js 18 或更新版本，无需安装依赖：
+
+```sh
+node --check fuck-educoder-paste.user.js
+node --test tests/*.test.cjs
+```
+
+可选的 `node tests/codemirror-browser-smoke.cjs` 使用预装 Playwright，并要求设置 `CODEMIRROR_PATH`（CodeMirror 5 的 `lib/codemirror.js`）和 `CHROMIUM_PATH`（浏览器可执行文件）。它检查真实编辑器的选区、文本和撤销，不访问课程网站；不代表脚本管理器及真实学习通页面已验收。
+
 ## 📄 许可证
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
