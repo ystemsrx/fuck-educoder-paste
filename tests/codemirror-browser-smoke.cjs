@@ -8,7 +8,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const source = fs.readFileSync(process.env.SCRIPT_PATH || path.join(__dirname, '..', 'fuck-educoder-paste.user.js'), 'utf8');
 if (!process.env.CODEMIRROR_PATH) throw Error('Set CODEMIRROR_PATH to CodeMirror 5 lib/codemirror.js');
-const helpers = ['withTemporaryReadWrite', 'withMutedCodeMirrorBeforeChange', 'replaceInCodeMirror', 'insertIntoCodeMirror'].map(name => {
+const helpers = ['dispatchBasicEvents', 'withTemporaryReadWrite', 'withMutedCodeMirrorBeforeChange', 'replaceInCodeMirror', 'insertIntoCodeMirror'].map(name => {
   const match = new RegExp(`^( +)function ${name}\\(`, 'm').exec(source);
   assert.ok(match, `Missing helper ${name}`);
   const end = source.indexOf(`\n${match[1]}}`, match.index);
@@ -22,7 +22,7 @@ const helpers = ['withTemporaryReadWrite', 'withMutedCodeMirrorBeforeChange', 'r
     const page = await context.newPage();
     await page.setContent('<!doctype html><body>');
     await page.addScriptTag({ path: process.env.CODEMIRROR_PATH });
-    await page.addScriptTag({ content: 'window.state = { markInserted() {} }; function dispatchBasicEvents() {}\n' + helpers });
+    await page.addScriptTag({ content: 'window.state = { markInserted() {} };\n' + helpers });
     const results = await page.evaluate(() => {
       function run({ fallback = false, reverse = false, text = 'X', same = false, transformed = false, cancel = false } = {}) {
         const host = document.createElement('div'); document.body.append(host);
