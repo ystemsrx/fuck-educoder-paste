@@ -1353,6 +1353,19 @@
       if (!doc) return false;
 
       const before = doc.getValue();
+      const selectionState = () => {
+        if (typeof cm.listSelections === "function") return JSON.stringify(cm.listSelections());
+        if (typeof doc.getCursor === "function") {
+          return JSON.stringify([doc.getCursor("from"), doc.getCursor("to")]);
+        }
+        return null;
+      };
+      const beforeSelection = selectionState();
+      let changed = false;
+      let usedRangeFallback = false;
+      let appliedChange = null;
+      const onChange = (_editor, change) => { changed = true; appliedChange = change; };
+      const observesChanges = typeof cm.on === "function" && typeof cm.off === "function";
 
       const run = () => {
         if (
@@ -1382,26 +1395,51 @@
           typeof doc.replaceRange === "function" &&
           typeof doc.getCursor === "function"
         ) {
-          const cursor = doc.getCursor();
-          doc.replaceRange(text, cursor, cursor, "+input");
+          const from = doc.getCursor("from");
+          const to = doc.getCursor("to");
+          usedRangeFallback = true;
+          doc.replaceRange(text, from, to, "+input");
         }
       };
 
-      withTemporaryReadWrite(cm, () => {
-        if (muted) {
-          withMutedCodeMirrorBeforeChange(cm, doc, () => {
-            if (typeof cm.operation === "function") {
-              cm.operation(run);
-            } else {
-              run();
-            }
-          });
-        } else if (typeof cm.operation === "function") {
-          cm.operation(run);
-        } else {
-          run();
-        }
-      });
+      let editError;
+      try {
+        if (observesChanges) cm.on("change", onChange);
+        withTemporaryReadWrite(cm, () => {
+          if (muted) {
+            withMutedCodeMirrorBeforeChange(cm, doc, () => {
+              if (typeof cm.operation === "function") {
+                cm.operation(run);
+              } else {
+                run();
+              }
+            });
+          } else if (typeof cm.operation === "function") {
+            cm.operation(run);
+          } else {
+            run();
+          }
+        });
+      } catch (error) {
+        editError = error;
+      } finally {
+        if (observesChanges) { try { cm.off("change", onChange); } catch (_) {} }
+      }
+
+      // A same-text replacement can collapse the selection without changing
+      // getValue(). A site callback may also throw after the edit completed.
+      // Neither case should trigger insertIntoCodeMirror's second insertion.
+      const inserted = changed || doc.getValue() !== before || selectionState() !== beforeSelection;
+      if (editError && !inserted) throw editError;
+      if (inserted && usedRangeFallback && typeof doc.setCursor === "function" &&
+          appliedChange?.from && Array.isArray(appliedChange.text) && appliedChange.text.length) {
+        // Public change data includes any text transformed by beforeChange.
+        const lines = appliedChange.text, from = appliedChange.from;
+        try {
+          doc.setCursor({ line: from.line + lines.length - 1,
+            ch: lines.length === 1 ? from.ch + lines[0].length : lines[lines.length - 1].length });
+        } catch (_) {}
+      }
 
       try {
         cm.save?.();
@@ -1419,7 +1457,7 @@
         dispatchBasicEvents(cm.getTextArea?.(), win);
       } catch (_) {}
 
-      return doc.getValue() !== before;
+      return inserted;
     }
 
     function insertIntoCodeMirror(cm, text) {
